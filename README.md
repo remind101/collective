@@ -20,6 +20,7 @@ It includes collectors for the following:
 
 * Sidekiq
 * Redis
+* Memcached
 
 ## Installation
 

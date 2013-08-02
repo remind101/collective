@@ -1,2 +1,3 @@
 use Collective::Collectors::Sidekiq
 use Collective::Collectors::Redis
+use Collective::Collectors::Memcached
