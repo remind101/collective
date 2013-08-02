@@ -2,7 +2,6 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'collective'
-Bundler.require if File.exists?('Gemfile')
 
 begin
   require 'collective/cli'
