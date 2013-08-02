@@ -1,5 +1,7 @@
 module Collective::Services
   class Sidekiq < Collective::Service
+    MEGABYTE = 1024 * 1024
+
     requires :sidekiq
 
     instrument do
@@ -13,7 +15,7 @@ module Collective::Services
       end
 
       # General redis metrics
-      info = Sidekiq.redis { |conn| conn.info }
+      info = ::Sidekiq.redis { |conn| conn.info }
       instrument 'redis.used_memory', ( info['used_memory'].to_f / MEGABYTE ).round(2)
       instrument 'redis.connected_clients', info['connected_clients']
       instrument 'redis.blocked_clients', info['blocked_clients']

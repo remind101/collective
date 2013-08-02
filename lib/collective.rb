@@ -1,4 +1,5 @@
 require 'rufus-scheduler'
+require 'formatted-metrics'
 
 require 'collective/version'
 
@@ -19,7 +20,9 @@ module Collective
     end
 
     def run
-      services.each do |service|
+      Metrics.subscribe
+
+      services.map(&:new).each do |service|
         scheduler.every '1s' do
           service.collect
         end

@@ -5,12 +5,16 @@ module Collective
 
     attr_reader :options
 
-    def initialize(options)
+    def initialize(options = {})
       @options = options
     end
 
     def collect
       _instrument
+    end
+
+    def instrument(*args, &block)
+      Metrics.instrument(*args, &block)
     end
   end
 end
