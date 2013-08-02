@@ -9,8 +9,8 @@ module Collective
       @options = options
     end
 
-    def collect
-      _instrument
+    def collect!
+      collect
     end
 
     def instrument(*args, &block)

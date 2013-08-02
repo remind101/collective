@@ -9,8 +9,8 @@ module Collective
         Array(libs).each { |lib| require lib.to_s }
       end
 
-      def instrument(&block)
-        define_method :_instrument, &block
+      def collect(&block)
+        define_method :collect, &block
       end
     end
   end
