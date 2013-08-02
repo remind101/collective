@@ -1,24 +1,24 @@
 # Collective
 
-TODO: Write a gem description
+It collects metrics.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'collective'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install collective
+    gem 'collective-metrics'
 
 ## Usage
 
-TODO: Write usage instructions here
+Add a Collectfile:
+
+```
+require 'collective/services/sidekiq'
+```
+
+```
+collective start
+```
 
 ## Contributing
 
