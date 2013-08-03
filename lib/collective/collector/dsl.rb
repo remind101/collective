@@ -8,6 +8,11 @@ module Collective
       def collect(&block)
         define_method :collect, &block
       end
+
+      def resolution(resolution = nil)
+        @resolution = resolution if resolution
+        @resolution
+      end
     end
   end
 end

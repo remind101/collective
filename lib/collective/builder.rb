@@ -1,5 +1,7 @@
 module Collective
   class Builder
+    DEFAULT_RESOLUTION = '1s'.freeze
+
     def use(klass, *args)
       collectors << [klass, args]
     end
@@ -7,7 +9,7 @@ module Collective
     def run
       collectors.each do |(klass, args)|
         collector = klass.new(*args)
-        scheduler.every '1s' do
+        scheduler.every klass.resolution || DEFAULT_RESOLUTION do
           collector.collect
         end
       end
