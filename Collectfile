@@ -1,1 +1,2 @@
 use Collective::Collectors::Sidekiq
+use Collective::Collectors::Redis

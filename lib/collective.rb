@@ -9,6 +9,7 @@ module Collective
 
   module Collectors
     autoload :Sidekiq, 'collective/collectors/sidekiq'
+    autoload :Redis,   'collective/collectors/redis'
   end
 
   class << self
