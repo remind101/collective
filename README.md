@@ -3,6 +3,17 @@
 It collects metrics from various services/systems and outputs them to STDOUT
 using the [l2met log convetions](https://github.com/ryandotsmith/l2met/wiki/Usage#logging-convention).
 
+```
+source=erics_mac_book_pro.local measure.redis.used_memory=1.02
+source=erics_mac_book_pro.local measure.redis.connected_clients=2
+source=erics_mac_book_pro.local measure.sidekiq.queues.processed=1275
+source=erics_mac_book_pro.local measure.sidekiq.queues.failed=128
+source=erics_mac_book_pro.local measure.redis.blocked_clients=0
+source=erics_mac_book_pro.local measure.redis.connected_slaves=0
+source=erics_mac_book_pro.local measure.sidekiq.queues.enqueued=0
+source=erics_mac_book_pro.local measure.sidekiq.workers.busy=0
+```
+
 ## Collectors
 
 It includes collectors for the following:
