@@ -33,7 +33,7 @@ gem 'collective-metrics'
 
 Add a Collectfile:
 
-```
+```ruby
 use Collective::Collectors::Sidekiq
 use Collective::Collectors::Redis
 use Collective::Collectors::Redis, url: ENV['ROLLOUT_REDIS_URL']
