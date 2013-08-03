@@ -1,5 +1,5 @@
-module Collective::Services
-  class Sidekiq < Collective::Service
+module Collective::Collectors
+  class Sidekiq < Collective::Collector
     MEGABYTE = 1024 * 1024
 
     requires :sidekiq

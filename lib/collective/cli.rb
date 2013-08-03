@@ -7,7 +7,6 @@ module Collective
     desc 'start', 'Run the collector'
 
     def start
-      load 'Collectfile'
       Collective.run
     end
   end

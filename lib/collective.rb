@@ -4,35 +4,20 @@ require 'formatted-metrics'
 require 'collective/version'
 
 module Collective
-  autoload :Service, 'collective/service'
+  autoload :Collector, 'collective/collector'
+  autoload :Builder,   'collective/builder'
 
-  module Services
-    autoload :Sidekiq, 'collective/services/sidekiq'
+  module Collectors
+    autoload :Sidekiq, 'collective/collectors/sidekiq'
   end
 
   class << self
-    def services
-      @services ||= []
-    end
-
-    def register(service)
-      services << service
-    end
-
     def run
       Metrics.subscribe
 
-      services.map(&:new).each do |service|
-        scheduler.every '1s' do
-          service.collect
-        end
-      end
-
-      scheduler.join
-    end
-
-    def scheduler
-      @scheduler ||= Rufus::Scheduler.new
+      builder = Builder.new
+      builder.instance_eval File.read('Collectfile')
+      builder.run
     end
   end
 end

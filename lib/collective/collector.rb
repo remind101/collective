@@ -1,6 +1,6 @@
 module Collective
-  class Service
-    autoload :DSL, 'collective/service/dsl'
+  class Collector
+    autoload :DSL, 'collective/collector/dsl'
     extend DSL
 
     attr_reader :options
