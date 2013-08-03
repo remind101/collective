@@ -1,6 +1,6 @@
 module Collective
   class Builder
-    DEFAULT_RESOLUTION = '1s'.freeze
+    DEFAULT_RESOLUTION = '5s'.freeze
 
     def use(klass, *args)
       collectors << [klass, args]
