@@ -3,13 +3,15 @@ module Collective::Collectors
     requires :sidekiq
 
     collect do
-      instrument 'sidekiq.queues.processed', stats.processed
-      instrument 'sidekiq.queues.failed',    stats.failed
-      instrument 'sidekiq.queues.enqueued',  stats.enqueued
-      instrument 'sidekiq.workers.busy',     workers
+      group 'sidekiq' do |group|
+        group.instrument 'queues.processed', stats.processed
+        group.instrument 'queues.failed',    stats.failed
+        group.instrument 'queues.enqueued',  stats.enqueued
+        group.instrument 'workers.busy',     workers
 
-      queues.each do |queue, depth|
-        instrument 'sidekiq.queue.enqueued', depth, source: queue
+        queues.each do |queue, depth|
+          group.instrument 'queue.enqueued', depth, source: queue
+        end
       end
     end
 

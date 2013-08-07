@@ -15,7 +15,6 @@ module Collective
 
   class << self
     def run
-      Metrics.subscribe
       STDOUT.sync = true
 
       builder = Builder.new
