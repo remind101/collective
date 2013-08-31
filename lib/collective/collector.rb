@@ -16,5 +16,9 @@ module Collective
     def instrument(*args, &block)
       Metrics.instrument(*args, &block)
     end
+
+    def group(*args, &block)
+      Metrics.group(*args, &block)
+    end
   end
 end

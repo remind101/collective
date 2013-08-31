@@ -3,9 +3,11 @@ module Collective::Collectors
     requires :dalli
 
     collect do
-      client.stats.each do |server, stats|
-        stats.each do |metric, value|
-          instrument "memcached.#{metric}", value, source: server
+      Metrics.group 'memcached' do |group|
+        client.stats.each do |server, stats|
+          stats.each do |metric, value|
+            group.instrument metric, value, source: server
+          end
         end
       end
     end

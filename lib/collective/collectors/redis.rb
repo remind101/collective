@@ -5,10 +5,12 @@ module Collective::Collectors
     requires :redis
 
     collect do
-      instrument 'redis.used_memory',       (info['used_memory'].to_f / MEGABYTE).round(2)
-      instrument 'redis.connected_clients', info['connected_clients']
-      instrument 'redis.blocked_clients',   info['blocked_clients']
-      instrument 'redis.connected_slaves',  info['connected_slaves']
+      group 'redis' do |group|
+        group.instrument 'used_memory',       (info['used_memory'].to_f / MEGABYTE).round(2)
+        group.instrument 'connected_clients', info['connected_clients']
+        group.instrument 'blocked_clients',   info['blocked_clients']
+        group.instrument 'connected_slaves',  info['connected_slaves']
+      end
     end
 
   private
