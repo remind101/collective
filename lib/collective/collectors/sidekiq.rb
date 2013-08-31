@@ -10,6 +10,7 @@ module Collective::Collectors
         group.instrument 'workers.busy',     workers
 
         queues.each do |queue, depth|
+          group.instrument 'queue.latency', queue_latency(queue), source: queue
           group.instrument 'queue.enqueued', depth, source: queue
         end
       end
@@ -23,6 +24,10 @@ module Collective::Collectors
 
     def queues
       stats.queues
+    end
+
+    def queue_latency(name)
+      ::Sidekiq::Queue.new(name).latency rescue 0
     end
 
     def workers
