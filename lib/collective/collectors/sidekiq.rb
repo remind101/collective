@@ -4,14 +4,14 @@ module Collective::Collectors
 
     collect do
       group 'sidekiq' do |group|
-        group.instrument 'queues.processed', stats.processed
-        group.instrument 'queues.failed',    stats.failed
-        group.instrument 'queues.enqueued',  stats.enqueued
-        group.instrument 'workers.busy',     workers
+        group.instrument 'queues.processed', stats.processed, type: 'sample'
+        group.instrument 'queues.failed',    stats.failed, type: 'sample'
+        group.instrument 'queues.enqueued',  stats.enqueued, type: 'sample'
+        group.instrument 'workers.busy',     workers, type: 'sample'
 
         queues.each do |queue, depth|
-          group.instrument 'queue.latency', queue_latency(queue), source: queue
-          group.instrument 'queue.enqueued', depth, source: queue
+          group.instrument 'queue.latency', queue_latency(queue), source: queue, type: 'sample'
+          group.instrument 'queue.enqueued', depth, source: queue, type: 'sample'
         end
       end
     end

@@ -6,7 +6,7 @@ module Collective::Collectors
       Metrics.group 'memcached' do |group|
         client.stats.each do |server, stats|
           stats.each do |metric, value|
-            group.instrument metric, value, source: server
+            group.instrument metric, value, source: server, type: 'sample'
           end
         end
       end
