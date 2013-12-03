@@ -11,6 +11,7 @@ module Collective
     autoload :Sidekiq,   'collective/collectors/sidekiq'
     autoload :Redis,     'collective/collectors/redis'
     autoload :Memcached, 'collective/collectors/memcached'
+    autoload :RabbitMQ,  'collective/collectors/rabbitmq'
   end
 
   class << self

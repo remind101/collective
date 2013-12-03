@@ -21,6 +21,7 @@ It includes collectors for the following:
 * Sidekiq
 * Redis
 * Memcached
+* RabbitMQ (You need to have the management plugin enabled)
 
 ## Installation
 
@@ -37,7 +38,7 @@ Add a Collectfile:
 ```ruby
 use Collective::Collectors::Sidekiq
 use Collective::Collectors::Redis
-use Collective::Collectors::Redis, url: ENV['ROLLOUT_REDIS_URL']
+use Collective::Collectors::RabbitMQ, url: ENV['RABBITMQ_MANAGEMENT_URL']
 ```
 
 Start the collectors.
