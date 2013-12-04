@@ -1,5 +1,3 @@
-require 'pp'
-
 module Collective::Collectors
   class RabbitMQ < Collective::Collector
     requires :faraday
@@ -28,8 +26,8 @@ module Collective::Collectors
     def instrument_queues
       queues = client.get('queues').body
 
-      group 'rabbitmq.queue' do |group|
-        queues.each do |queue|
+      queues.each do |queue|
+        group 'rabbitmq.queue' do |group|
           instrument_hash(group, queue, source: "rabbitmq.queue.#{queue['name']}")
         end
       end
