@@ -28,7 +28,7 @@ module Collective::Collectors
 
       queues.each do |queue|
         group 'rabbitmq.queue' do |group|
-          instrument_hash(group, queue, source: "rabbitmq.queue.#{queue['name']}")
+          instrument_hash(group, queue, source: queue['name'])
         end
       end
     end
