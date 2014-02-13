@@ -17,7 +17,7 @@ module Collective::Collectors
 
       group 'rabbitmq' do |group|
         nodes.each do |node|
-          instrument_hash(group, node, source: node['name'])
+          instrument_hash(group, node, source: node['name'].to_s.gsub('@', '.'))
         end
       end
     end
