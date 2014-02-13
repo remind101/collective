@@ -7,9 +7,20 @@ module Collective::Collectors
     collect do
       instrument_overview
       instrument_queues
+      instrument_channels
     end
 
   private
+
+    def instrument_channels
+      nodes = client.get('nodes').body
+
+      group 'rabbitmq' do |group|
+        nodes.each do |node|
+          instrument_hash(group, node, source: node['name'])
+        end
+      end
+    end
 
     def instrument_overview
       overview = client.get('overview').body
@@ -34,6 +45,7 @@ module Collective::Collectors
     end
 
     def instrument_hash(group, hash, options={})
+      return unless hash.respond_to?(:each)
       hash.each do |key, val|
         case val
         when Hash
