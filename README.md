@@ -22,6 +22,7 @@ It includes collectors for the following:
 * Redis
 * Memcached
 * RabbitMQ (You need to have the management plugin enabled)
+* MongoDB
 
 ## Installation
 
@@ -39,6 +40,7 @@ Add a Collectfile:
 use Collective::Collectors::Sidekiq
 use Collective::Collectors::Redis
 use Collective::Collectors::RabbitMQ, url: ENV['RABBITMQ_MANAGEMENT_URL']
+use Collective::Collectors::Mongodb, config: File.expand_path('./config/mongoid.yml')
 ```
 
 Start the collectors.
