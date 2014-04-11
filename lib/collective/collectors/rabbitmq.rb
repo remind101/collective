@@ -58,10 +58,6 @@ module Collective::Collectors
       end
     end
 
-    def instrumentable?(value)
-      Float(value) rescue nil
-    end
-
     def client
       @client ||= Faraday.new(url) do |builder|
         builder.response :json, content_type: /\bjson$/

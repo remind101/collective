@@ -20,5 +20,11 @@ module Collective
     def group(*args, &block)
       Metrics.group(*args, &block)
     end
+
+  private
+
+    def instrumentable?(value)
+      Float(value) rescue nil
+    end
   end
 end

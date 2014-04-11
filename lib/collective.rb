@@ -12,6 +12,7 @@ module Collective
     autoload :Redis,     'collective/collectors/redis'
     autoload :Memcached, 'collective/collectors/memcached'
     autoload :RabbitMQ,  'collective/collectors/rabbitmq'
+    autoload :Mongodb,   'collective/collectors/mongodb'
   end
 
   class << self
