@@ -1,3 +1,7 @@
 use Collective::Collectors::Sidekiq
 use Collective::Collectors::Redis
 use Collective::Collectors::Memcached
+unless ENV['NEWRELIC_API_KEY'].nil? || ENV['NEWRELIC_API_KEY'].empty?
+  use Collective::Collectors::Newrelic, api_key: ENV['NEWRELIC_API_KEY'], filter: ENV['NEW_RELIC_APPLICATION_FILTER']
+end
+
