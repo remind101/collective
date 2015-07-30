@@ -20,7 +20,7 @@ module Collective::Collectors
         end
 
         totals_by_env.each do |env, total|
-          instrument 'honeybadger.faults.notices', total, source: "%s.%s" % [project['name'], env]
+          instrument 'honeybadger.faults.notices', total, source: "%s.%s" % [project['name'], env], type: 'count'
         end
       end
     end
