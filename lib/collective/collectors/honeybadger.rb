@@ -19,9 +19,8 @@ module Collective::Collectors
           totals_by_env[fault['environment']] += fault['notices_count']
         end
 
-        group 'honeybadger' do |group|
-          totals_by_env.each do |env, total|
-          group.instrument 'faults.notices', total, source: "%s.%s" % [project['name'], env]
+        totals_by_env.each do |env, total|
+          instrument 'honeybadger.faults.notices', total, source: "%s.%s" % [project['name'], env]
         end
       end
     end
@@ -57,6 +56,5 @@ module Collective::Collectors
     def auth_token
       options[:auth_token]
     end
-
   end
 end
