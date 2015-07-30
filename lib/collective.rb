@@ -8,11 +8,12 @@ module Collective
   autoload :Builder,   'collective/builder'
 
   module Collectors
-    autoload :Sidekiq,   'collective/collectors/sidekiq'
-    autoload :Redis,     'collective/collectors/redis'
-    autoload :Memcached, 'collective/collectors/memcached'
-    autoload :RabbitMQ,  'collective/collectors/rabbitmq'
-    autoload :Mongodb,   'collective/collectors/mongodb'
+    autoload :Sidekiq,     'collective/collectors/sidekiq'
+    autoload :Redis,       'collective/collectors/redis'
+    autoload :Memcached,   'collective/collectors/memcached'
+    autoload :RabbitMQ,    'collective/collectors/rabbitmq'
+    autoload :Mongodb,     'collective/collectors/mongodb'
+    autoload :Honeybadger, 'collective/collectors/honeybadger'
   end
 
   class << self
