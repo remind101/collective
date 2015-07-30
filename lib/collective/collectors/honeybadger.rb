@@ -4,6 +4,8 @@ module Collective::Collectors
     requires :faraday_middleware
     requires :json
 
+    resolution '60s'
+
     collect do
       instrument_exceptions
     end
