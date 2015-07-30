@@ -55,7 +55,7 @@ module Collective::Collectors
     end
 
     def auth_token
-      ENV['HONEYBADGER_AUTH_TOKEN']
+      options[:auth_token]
     end
 
   end
