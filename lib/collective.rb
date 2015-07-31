@@ -14,6 +14,7 @@ module Collective
     autoload :RabbitMQ,    'collective/collectors/rabbitmq'
     autoload :Mongodb,     'collective/collectors/mongodb'
     autoload :Honeybadger, 'collective/collectors/honeybadger'
+    autoload :Newrelic,    'collective/collectors/newrelic'
   end
 
   class << self
