@@ -4,57 +4,60 @@ module Collective::Collectors
     requires :faraday_middleware
     requires :json
 
+    resolution '60s'
+
     collect do
-      group 'newrelic' do |group|
-        instrument_applications group
-        instrument_key_transactions group
-      end
+      instrument_applications 'newrelic'
+      instrument_key_transactions 'newrelic'
     end
 
     private
 
-    def instrument_applications(group)
+    def instrument_applications(prefix)
       paged('/v2/applications.json', 'applications').each do |app|
         next unless app['name'].include? filter
+        next unless app['reporting']
 
-        group.group app['name'] do |group|
-          instrument_appdex group, app
+        group "#{prefix}.#{app['name']}" do |group|
+          instrument_apdex group, app
         end
       end
     end
 
-    def instrument_key_transactions(group)
-      # TODO: also apply application filter here?
-      paged('/v2/key_transactions.json', 'key_transactions').each do |key_transaction|
+    def instrument_key_transactions(prefix)
+      # max_pages is a workaround for a new relic bug, it's currently returning the first page
+      # if you ask for a non-existent page instead of returning an empty list (as it
+      # does for /v2/applications.json)
+      paged('/v2/key_transactions.json', 'key_transactions', max_pages=1).each do |key_transaction|
         # Not sure if the names are quoted, replace
         sanitized_name = key_transaction['name'].gsub(/ /, '_')
-        group.group sanitized_name do |group|
-          instrument_appdex group, key_transaction
+        group "#{prefix}.key.#{sanitized_name}" do |group|
+          instrument_apdex group, key_transaction
         end
       end
     end
 
     # Given an `info` hash that contains appdex summaries, instruments the
     # application and browser appdex scores
-    def instrument_appdex(group, info)
+    def instrument_apdex(group, info)
       if info.include? 'application_summary'
-        group.instrument 'response_time', info['response_time']
-        group.instrument 'appdex_score', info['appdex_score']
+        group.instrument 'response_time', info['application_summary']['response_time'], units: 'ms'
+        group.instrument 'apdex_score', info['application_summary']['apdex_score']
       end
       if info.include? 'end_user_summary'
         group.group 'browser' do |group|
-          group.instrument 'response_time', info['response_time']
-          group.instrument 'appdex_score', info['appdex_score']
+          group.instrument 'response_time', info['end_user_summary']['response_time'], units: 's'
+          group.instrument 'apdex_score', info['end_user_summary']['apdex_score']
         end
       end
     end
 
     # Pages through items specified by `json_key` and yields them one at a time
-    def paged(path, json_key)
+    def paged(path, json_key, max_pages=3)
       Enumerator.new do |yielder|
         page = 1
         resp = get path, page: page
-        while resp.headers['Link'] || resp.body[json_key].length > 0 do
+        while resp.body[json_key].length > 0 && page <= max_pages do
           resp.body[json_key].each { |obj| yielder.yield obj }
           page += 1
           resp = get path, page: page
