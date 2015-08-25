@@ -7,4 +7,5 @@ group :development do
   gem 'dalli'
   gem 'sidekiq'
   gem 'mongoid', '~> 3.0'
+  gem 'pg'
 end
