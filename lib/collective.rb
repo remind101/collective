@@ -15,6 +15,7 @@ module Collective
     autoload :Mongodb,     'collective/collectors/mongodb'
     autoload :Honeybadger, 'collective/collectors/honeybadger'
     autoload :Newrelic,    'collective/collectors/newrelic'
+    autoload :PGBouncer,   'collective/collectors/pgbouncer'
   end
 
   class << self
