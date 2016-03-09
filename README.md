@@ -23,6 +23,7 @@ It includes collectors for the following:
 * Memcached
 * RabbitMQ (You need to have the management plugin enabled)
 * MongoDB
+* Postgres
 
 ## Installation
 
