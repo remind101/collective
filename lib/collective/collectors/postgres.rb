@@ -4,6 +4,8 @@ module Collective::Collectors
 
     requires :pg
 
+    resolution '600s'
+
     collect do
       group 'postgres' do |group|
         instrument_relation_size_data group
@@ -20,7 +22,7 @@ module Collective::Collectors
     end
 
     def size_query
-      "SELECT relname AS 'relation', pg_total_relation_size(C.oid) AS 'total_size'
+      "SELECT relname AS relation, pg_total_relation_size(C.oid) AS total_size
       FROM pg_class C
       LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
       WHERE nspname NOT IN ('pg_catalog', 'information_schema')
@@ -33,7 +35,7 @@ module Collective::Collectors
     end
 
     def connection_options
-      (options[:connection] || {}).merge(dbname: 'postgres')
+      options[:connection] || {}
     end
   end
 end
