@@ -15,10 +15,12 @@ module Collective::Collectors
     private
 
     def instrument_relation_size_data(group)
+      conn = PG.connect(connection_options)
       size_tuples = conn.exec(size_query)
       size_tuples.each do |tuple|
         group.instrument tuple['relation'], (tuple['total_size'].to_f / MEGABYTE).round(2), units: 'MB'
       end
+      conn.close
     end
 
     def size_query
@@ -28,10 +30,6 @@ module Collective::Collectors
       WHERE nspname NOT IN ('pg_catalog', 'information_schema')
       AND C.relkind <> 'i'
       AND nspname !~ '^pg_toast';"
-    end
-
-    def conn
-      @conn ||= PG.connect(connection_options)
     end
 
     def connection_options
