@@ -22,7 +22,7 @@ module Collective::Collectors
           group.instrument "#{tuple['relation']}.size", (tuple['total_size'].to_f / MEGABYTE).round(2), units: 'MB'
         end
       ensure
-        conn.close
+        conn.close if conn != nil
       end
     end
 
