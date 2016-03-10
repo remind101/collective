@@ -7,7 +7,7 @@ module Collective::Collectors
     resolution '600s'
 
     collect do
-      group 'postgres' do |group|
+      group "postgres.#{connection_options[:dbname]}" do |group|
         instrument_relation_size_data group
       end
     end
@@ -15,12 +15,15 @@ module Collective::Collectors
     private
 
     def instrument_relation_size_data(group)
-      conn = PG.connect(connection_options)
-      size_tuples = conn.exec(size_query)
-      size_tuples.each do |tuple|
-        group.instrument tuple['relation'], (tuple['total_size'].to_f / MEGABYTE).round(2), units: 'MB'
+      begin
+        conn = PG.connect(connection_options)
+        size_tuples = conn.exec(size_query)
+        size_tuples.each do |tuple|
+          group.instrument "#{tuple['relation']}.size", (tuple['total_size'].to_f / MEGABYTE).round(2), units: 'MB'
+        end
+      ensure
+        conn.close
       end
-      conn.close
     end
 
     def size_query
