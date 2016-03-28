@@ -19,7 +19,8 @@ module Collective::Collectors
         conn = PG.connect(connection_options)
         size_tuples = conn.exec(size_query)
         size_tuples.each do |tuple|
-          group.instrument "#{tuple['relation']}.size", (tuple['total_size'].to_f / MEGABYTE).round(2), units: 'MB'
+          group.instrument "#{tuple['relation']}.size", (tuple['total_size'].to_f / MEGABYTE).round(2), units: 'MiB'
+          group.instrument 'total_disk_usage', (tuple['total_size'].to_f / MEGABYTE).round(2), units: 'MiB', tags: {relation: tuple['relation']}
         end
       ensure
         conn.close if conn != nil
