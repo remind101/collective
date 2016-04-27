@@ -31,6 +31,24 @@ module Collective::Collectors
       end
     end
 
+    # This function goes through a paged list of errors and yields each
+    # individual error.
+    #
+    # The most basic endpoint in the TrackJS API returns all the errors that
+    # have been detected from the beginning of time to the current date. This
+    # endpoint can return the number of errors seen in the last day, but since
+    # we're just trying to determine the number of errors that occurred in the
+    # last 60s, we use the default endpoint options.
+    #
+    # To avoid fetching all the errors, only the ones we haven't seen since
+    # the last time we checked, so we keep track of the id of the last error
+    # we saw and page through the error list until either:
+    #
+    # 1. We see an error we've already returned
+    # 2. We hit a maximum page limit (to avoid scanning the entire list of
+    #    errors the first time the collector is run)
+    # 3. We hit the very end of the error list
+    #
     def paged(path, params={})
       Enumerator.new do |yielder|
         page = 1
