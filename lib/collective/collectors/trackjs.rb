@@ -28,10 +28,6 @@ module Collective::Collectors
         p "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
         application = error['application'] if count == 0
         count += 1
-        # p error
-        # errors.each do |error|
-        #   instrument 'trackjs.url.errors', error['count'], source: error['key'], type: 'count'
-        # end
       end
       p "LOGGING #{count} errors to the collector for application #{application}"
       instrument 'trackjs.url.errors', count, source: application, type: 'count'
@@ -61,11 +57,9 @@ module Collective::Collectors
         pageSize = 10
         maxPages = 3
         resp = get_page(path, params, page, pageSize)
-        currentStartId = nil # TODO: better variable name
         getAnotherPage = true
+        currentInitialId = nil
 
-        # p "response data"
-        # p resp.body['data']
         p "response metadata"
         p resp.body['metadata']
         p "@lastSeenId"
@@ -73,22 +67,13 @@ module Collective::Collectors
         p "************************************************"
 
         data = resp.body['data']
-        # TODO: add documentation about what we're doing to handle the fact
-        # that trackjs only lets you get data at a minimum granularity of 1
-        # day.
         if data.length
-          # p "data[0]"
-          # p data[0]
-          # p "data[0].id"
-          # p data[0]['id']
-          currentStartId = data[0]['id']
+          currentInitialId = data[0]['id']
           p "storing most recent Id:"
-          p currentStartId
+          p currentInitialId
           p "************************************************"
 
-          # This will loop over every single event ever the first time it's run
-          # if it's not constrained somehow
-          while resp.body['metadata']['hasMore'] == true and page <= maxPages do # page < 3 do # resp.body['metadata']['hasMore'] == true do
+          while resp.body['metadata']['hasMore'] == true and page <= maxPages do
             resp.body['data'].each do |error|
               p "error"
               p error['message']
@@ -123,8 +108,8 @@ module Collective::Collectors
             p "3333333 Finished while loop because I hit the end of the errors list"
           end
           p "setting last seen id to"
-          p currentStartId
-          @lastSeenId = currentStartId
+          p currentInitialId
+          @lastSeenId = currentInitialId
         end
       end
     end
