@@ -14,7 +14,6 @@ module Collective::Collectors
     end
 
     collect do
-      p "COLLECT@@@@@@@@@@@@@@@@@@@@@@@"
       instrument_errors
     end
 
@@ -24,12 +23,9 @@ module Collective::Collectors
       count = 0
       application = ""
       paged("/#{customer_id}/v1/errors").each do |error|
-        p "tracking an error"
-        p "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
         application = error['application'] if count == 0
         count += 1
       end
-      p "LOGGING #{count} errors to the collector for application #{application}"
       instrument 'trackjs.url.errors', count, source: application, type: 'count'
     end
 
@@ -56,30 +52,18 @@ module Collective::Collectors
         page = 1
         pageSize = 250
         maxPages = 1
-        resp = get_page(path, params, page, pageSize)
         currentInitialId = nil
         getAnotherPage = true # set to true until an error id that has already been seen is hit
 
-        p "response metadata"
-        p resp.body['metadata']
-        p "@lastSeenId"
-        p @lastSeenId
-        p "************************************************"
-
+        resp = get_page(path, params, page, pageSize)
         data = resp.body['data']
+
         if data.length
           currentInitialId = data[0]['id']
-          p "storing most recent Id:"
-          p currentInitialId
-          p "************************************************"
 
           while resp.body['metadata']['hasMore'] == true and page <= maxPages do
             resp.body['data'].each do |error|
-              p "error"
-              p error['message']
-              p error['id']
               if error['id'] == @lastSeenId
-                p "BREAKING OUT OF LOOP. I'VE SEEN THIS ERROR BEFORE"
                 getAnotherPage = false
                 break
               else
@@ -92,29 +76,13 @@ module Collective::Collectors
             page += 1
             resp = get_page(path, params, page, pageSize)
           end
-          # check why i broke out of the while loop
-          # options:
-          # hit something i'd seen before
-          # hit the very end of the errors list
-          # hit the max page limit
-          if getAnotherPage == false
-            p "1111111 Finished while loop because I saw an error i'd seen before"
-          elsif page > maxPages
-            p "2222222 Finished while loop because I hit the max page limit"
-          else
-            p "3333333 Finished while loop because I hit the end of the errors list"
-          end
-          p "setting last seen id to"
-          p currentInitialId
+
           @lastSeenId = currentInitialId
         end
       end
     end
 
     def get_page(path, params, page, pageSize = 500)
-      p "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!>>>>>>>>>>>>"
-      p "getting a new page of results"
-      p "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!>>>>>>>>>>>>"
       client.get(path, params.merge(page: page, size: pageSize)) do |req|
         req.headers['Authorization'] = api_key
       end
