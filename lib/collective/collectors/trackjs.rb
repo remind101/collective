@@ -54,8 +54,8 @@ module Collective::Collectors
     def paged(path, params={})
       Enumerator.new do |yielder|
         page = 1
-        pageSize = 10
-        maxPages = 3
+        pageSize = 250
+        maxPages = 1
         resp = get_page(path, params, page, pageSize)
         currentInitialId = nil
         getAnotherPage = true # set to true until an error id that has already been seen is hit
