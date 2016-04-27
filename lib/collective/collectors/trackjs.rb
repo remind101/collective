@@ -21,14 +21,20 @@ module Collective::Collectors
     private
 
     def instrument_errors
+      count = 0
+      application = ""
       paged("/#{customer_id}/v1/errors").each do |error|
         p "tracking an error"
         p "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+        application = error['application'] if count == 0
+        count += 1
         # p error
         # errors.each do |error|
         #   instrument 'trackjs.url.errors', error['count'], source: error['key'], type: 'count'
         # end
       end
+      p "LOGGING #{count} errors to the collector for application #{application}"
+      instrument 'trackjs.url.errors', count, source: application, type: 'count'
     end
 
     # This function goes through a paged list of errors and yields each
