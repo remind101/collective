@@ -57,8 +57,8 @@ module Collective::Collectors
         pageSize = 10
         maxPages = 3
         resp = get_page(path, params, page, pageSize)
-        getAnotherPage = true
         currentInitialId = nil
+        getAnotherPage = true # set to true until an error id that has already been seen is hit
 
         p "response metadata"
         p resp.body['metadata']
