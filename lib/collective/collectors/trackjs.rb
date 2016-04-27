@@ -87,13 +87,10 @@ module Collective::Collectors
               end
             end
 
-            if getAnotherPage
-              p ">>>going to get another page"
-              page += 1
-              resp = get_page(path, params, page, pageSize)
-            else
-              break
-            end
+            break if !getAnotherPage
+
+            page += 1
+            resp = get_page(path, params, page, pageSize)
           end
           # check why i broke out of the while loop
           # options:
