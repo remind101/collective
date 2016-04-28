@@ -58,7 +58,7 @@ module Collective::Collectors
         resp = get_page(path, params, page, pageSize)
         data = resp.body['data']
 
-        if data.length
+        if data.length > 0
           currentInitialId = data[0]['id']
 
           while resp.body['metadata']['hasMore'] == true and page <= maxPages do
