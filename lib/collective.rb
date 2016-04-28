@@ -17,6 +17,7 @@ module Collective
     autoload :Newrelic,    'collective/collectors/newrelic'
     autoload :PGBouncer,   'collective/collectors/pgbouncer'
     autoload :Postgres,    'collective/collectors/postgres'
+    autoload :TrackJS,     'collective/collectors/trackjs'
   end
 
   class << self

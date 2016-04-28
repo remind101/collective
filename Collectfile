@@ -4,4 +4,6 @@ use Collective::Collectors::Memcached
 unless ENV['NEWRELIC_API_KEY'].nil? || ENV['NEWRELIC_API_KEY'].empty?
   use Collective::Collectors::Newrelic, api_key: ENV['NEWRELIC_API_KEY'], filter: ENV['NEWRELIC_APPLICATION_FILTER']
 end
-
+unless ENV['TRACKJS_API_KEY'].nil? || ENV['TRACKJS_API_KEY'].empty?
+  use Collective::Collectors::TrackJS, api_key: ENV['TRACKJS_API_KEY'], customer_id: ENV['TRACKJS_CUSTOMER_ID']
+end
