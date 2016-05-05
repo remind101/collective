@@ -61,7 +61,7 @@ module Collective::Collectors
         if data.length > 0
           currentInitialId = data[0]['id']
 
-          while resp.body['metadata']['hasMore'] == true and page <= maxPages do
+          while page <= maxPages do
             resp.body['data'].each do |error|
               if error['id'] == @lastSeenId
                 getAnotherPage = false
@@ -71,7 +71,7 @@ module Collective::Collectors
               end
             end
 
-            break if !getAnotherPage
+            break if !getAnotherPage or !resp.body['metadata']['hasMore']
 
             page += 1
             resp = get_page(path, params, page, pageSize)
