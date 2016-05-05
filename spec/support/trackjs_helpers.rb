@@ -9,8 +9,6 @@ module TrackJSHelpers
     application: "r101-frontend",
     id: SecureRandom.uuid
   })
-    # p "params"
-    # pp params
     trackJsUrl = "https://my.trackjs.com/details/#{params[:id]}"
     params[:message] ||= Faker::Lorem.sentence
 
@@ -46,8 +44,6 @@ module TrackJSHelpers
   def trackjs_response(errors = 0, totalErrors = 0, page = 1, pageSize = 250)
     data = errors.times.map { trackjs_error }
     hasMore = (page * pageSize) < totalErrors
-    p "trackjs_response calculating hasMore"
-    pp hasMore
 
     return {
       "data" => data,
