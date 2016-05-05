@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'faker'
 
 module TrackJSHelpers
   def trackjs_error(params = {
@@ -6,12 +7,12 @@ module TrackJSHelpers
     timestamp: Time.now.strftime("%FT%T%:z"),
     url: "https://www.remind.com",
     application: "r101-frontend",
-    id: SecureRandom.hex
+    id: SecureRandom.uuid
   })
-    p "params"
-    pp params
+    # p "params"
+    # pp params
     trackJsUrl = "https://my.trackjs.com/details/#{params[:id]}"
-    params[:message] ||= "stuff"
+    params[:message] ||= Faker::Lorem.sentence
 
     return {
       "message" => params[:message],
@@ -42,15 +43,15 @@ module TrackJSHelpers
     }
   end
 
-  def trackjs_response(errors = 0, page = 1, pageSize = 250, hasMore = true)
-    data = []
-    errors.times do
-      data.push(trackjs_error)
-    end
+  def trackjs_response(errors = 0, totalErrors = 0, page = 1, pageSize = 250)
+    data = errors.times.map { trackjs_error }
+    hasMore = (page * pageSize) < totalErrors
+    p "trackjs_response calculating hasMore"
+    pp hasMore
 
     return {
       "data" => data,
-      "metadata" => trackjs_metadata(data.length, page, pageSize, hasMore)
+      "metadata" => trackjs_metadata(totalErrors, page, pageSize, hasMore)
     }
   end
 end
