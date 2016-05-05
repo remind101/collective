@@ -13,6 +13,7 @@ end
 group :development, :test do
   gem 'rspec',   '~> 3.4.0'
   gem 'dotenv',  '~> 2.1.1'
+  gem 'faker'
 end
 
 group :test do
