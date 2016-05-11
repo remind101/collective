@@ -16,7 +16,7 @@ describe Collective::Collectors::TrackJS do
 
   context 'when no errors are returned' do
     let(:errors) { 0 }
-    let(:response) { trackjs_response errors, errors, page, page_size }
+    let(:response) { trackjs_response errors: errors, total_errors: errors, page: page, page_size: page_size }
 
     it 'logs an error count of 0' do
       stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
@@ -37,7 +37,7 @@ describe Collective::Collectors::TrackJS do
 
   context 'when less than a page of errors are returned' do
     let(:errors) { 45 }
-    let(:response) { trackjs_response errors, errors, page, page_size }
+    let(:response) { trackjs_response errors: errors, total_errors: errors, page: page, page_size: page_size }
 
     context 'when none of the errors have been logged before' do
       it 'logs all the errors returned' do
@@ -63,8 +63,8 @@ describe Collective::Collectors::TrackJS do
       let(:old_errors) { old_error_count.times.map { trackjs_error } }
       let(:new_errors) { new_error_count.times.map { trackjs_error } }
       let(:all_errors) { new_errors + old_errors }
-      let(:old_metadata) { trackjs_metadata old_error_count, page, page_size, false }
-      let(:new_metadata) { trackjs_metadata (old_error_count + new_error_count), page, page_size, false }
+      let(:old_metadata) { trackjs_metadata total_count: old_error_count, page: page, page_size: page_size, has_more: false }
+      let(:new_metadata) { trackjs_metadata total_count: (old_error_count + new_error_count), page: page, page_size: page_size, has_more: false }
       let(:old_response) { {"data" => old_errors, "metadata" => old_metadata} }
       let(:new_response) { {"data" => all_errors, "metadata" => new_metadata} }
 
@@ -103,8 +103,8 @@ describe Collective::Collectors::TrackJS do
     let(:page2) { 2 }
 
     context 'none of the errors have been logged before' do
-      let(:response) { trackjs_response old_error_count, total_errors, page, page_size }
-      let(:response2) { trackjs_response old_error_count, total_errors, page2, page_size }
+      let(:response) { trackjs_response errors: old_error_count, total_errors: total_errors, page: page, page_size: page_size }
+      let(:response2) { trackjs_response errors: old_error_count, total_errors: total_errors, page: page2, page_size: page_size }
 
       it 'logs maxPage * page size errors' do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
@@ -134,8 +134,8 @@ describe Collective::Collectors::TrackJS do
       let(:old_errors) { old_error_count.times.map { trackjs_error } }
       let(:new_errors) { new_error_count.times.map { trackjs_error } }
       let(:combined_errors) { (new_errors + old_errors).first page_size }
-      let(:old_metadata) { trackjs_metadata old_error_count, page, page_size, true }
-      let(:combined_metadata) { trackjs_metadata (old_error_count + new_error_count), page, page_size, true }
+      let(:old_metadata) { trackjs_metadata total_count: old_error_count, page: page, page_size: page_size, has_more: true }
+      let(:combined_metadata) { trackjs_metadata total_count: (old_error_count + new_error_count), page: page, page_size: page_size, has_more: true }
       let(:old_response) { {"data" => old_errors, "metadata" => old_metadata } }
       let(:combined_response) { {"data" => combined_errors, "metadata" => combined_metadata } }
 

@@ -9,7 +9,7 @@ module TrackJSHelpers
     application: "r101-frontend",
     id: SecureRandom.uuid
   })
-    trackJsUrl = "https://my.trackjs.com/details/#{params[:id]}"
+    trackjs_url = "https://my.trackjs.com/details/#{params[:id]}"
     params[:message] ||= Faker::Lorem.sentence
 
     return {
@@ -26,28 +26,33 @@ module TrackJSHelpers
       "file" => "https://www.remind.com/classes/sci02",
       "userId" => "11111111",
       "sessionId" => "",
-      "trackJsUrl" => trackJsUrl,
+      "trackJsUrl" => trackjs_url,
       "isStarred" => false
     }
   end
 
-  def trackjs_metadata(totalCount = 0, page = 1, pageSize = 250, hasMore = true)
+  def trackjs_metadata(total_count: 0, page: 1, page_size: 250, has_more: true)
     return {
-      "totalCount" => totalCount,
+      "totalCount" => total_count,
       "page" => page,
-      "size" => pageSize,
-      "hasMore" => hasMore,
+      "size" => page_size,
+      "hasMore" => has_more,
       "trackJsUrl" => "https://my.trackjs.com/recent?"
     }
   end
 
-  def trackjs_response(errors = 0, totalErrors = 0, page = 1, pageSize = 250)
+  def trackjs_response(errors: 0, total_errors: 0, page: 1, page_size: 250)
     data = errors.times.map { trackjs_error }
-    hasMore = (page * pageSize) < totalErrors
+    has_more = (page * page_size) < total_errors
 
     return {
       "data" => data,
-      "metadata" => trackjs_metadata(totalErrors, page, pageSize, hasMore)
+      "metadata" => trackjs_metadata(
+        total_count: total_errors,
+        page: page,
+        page_size: page_size,
+        has_more: has_more
+      )
     }
   end
 end

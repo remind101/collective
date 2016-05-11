@@ -8,8 +8,8 @@ module Collective::Collectors
 
     resolution '60s'
 
-    def initialize(lastSeenId = nil, options)
-      @lastSeenId = lastSeenId
+    def initialize(last_seen_id = nil, options)
+      @last_seen_id = last_seen_id
       super(options)
     end
 
@@ -50,40 +50,40 @@ module Collective::Collectors
     def paged(path, params={})
       Enumerator.new do |yielder|
         page = 1
-        pageSize = 250
-        maxPages = 1
-        currentInitialId = nil
-        getAnotherPage = true # set to true until an error id that has already been seen is hit
+        page_size = 250
+        max_pages = 1
+        current_initial_id = nil
+        get_another_page = true # set to true until an error id that has already been seen is hit
 
-        resp = get_page(path, params, page, pageSize)
+        resp = get_page(path, params, page, page_size)
         data = resp.body['data']
 
         if data.length > 0
-          currentInitialId = data[0]['id']
+          current_initial_id = data[0]['id']
 
-          while page <= maxPages do
+          while page <= max_pages do
             resp.body['data'].each do |error|
-              if error['id'] == @lastSeenId
-                getAnotherPage = false
+              if error['id'] == @last_seen_id
+                get_another_page = false
                 break
               else
                 yielder.yield error
               end
             end
 
-            break if !getAnotherPage or !resp.body['metadata']['hasMore']
+            break if !get_another_page or !resp.body['metadata']['hasMore']
 
             page += 1
-            resp = get_page(path, params, page, pageSize)
+            resp = get_page(path, params, page, page_size)
           end
 
-          @lastSeenId = currentInitialId
+          @last_seen_id = current_initial_id
         end
       end
     end
 
-    def get_page(path, params, page, pageSize = 500)
-      client.get(path, params.merge(page: page, size: pageSize)) do |req|
+    def get_page(path, params, page, page_size = 500)
+      client.get(path, params.merge(page: page, size: page_size)) do |req|
         req.headers['Authorization'] = api_key
       end
     end
