@@ -6,12 +6,15 @@ describe Collective::Collectors::TrackJS do
   let(:env_customer_id) { ENV["TRACKJS_CUSTOMER_ID"] }
   let(:page_size) { 250 }
   let(:page) { 1 }
+  let(:no_errors) { 0 }
+  let(:empty_response) { trackjs_response errors: no_errors, total_errors: no_errors, page: page, page_size: page_size }
 
   before do
-    @collector = Collective::Collectors::TrackJS.new nil, {
+    @collector = Collective::Collectors::TrackJS.new(
+      :last_seen_id => {},
       :api_key => env_api_key,
       :customer_id => env_customer_id
-    }
+    )
   end
 
   context 'when no errors are returned' do
@@ -62,7 +65,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -101,7 +104,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => old_response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -120,7 +123,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => new_response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -159,7 +162,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -173,7 +176,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page2, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => response2.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -210,7 +213,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => old_response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -224,7 +227,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page2, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => old_response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -242,7 +245,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => combined_response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )

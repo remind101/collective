@@ -8,8 +8,8 @@ module Collective::Collectors
 
     resolution '60s'
 
-    def initialize(last_seen_id = {}, options)
-      @last_seen_id = last_seen_id
+    def initialize(options = {})
+      @last_seen_id = options[:last_seen_id]
       super(options)
     end
 
