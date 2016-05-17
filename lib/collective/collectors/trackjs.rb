@@ -14,16 +14,15 @@ module Collective::Collectors
     end
 
     collect do
-      instrument_errors
+      instrument_errors "r101-frontend"
+      instrument_errors "r101-marketing"
     end
 
     private
 
-    def instrument_errors
+    def instrument_errors(application)
       count = 0
-      application = ""
-      paged("/#{customer_id}/v1/errors").each do |error|
-        application = error['application'] if count == 0
+      paged("/#{customer_id}/v1/errors", {application: application}).each do |error|
         count += 1
       end
       instrument 'trackjs.url.errors', count, source: application, type: 'count'
