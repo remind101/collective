@@ -8,7 +8,7 @@ module Collective::Collectors
 
     resolution '60s'
 
-    def initialize(last_seen_id = nil, options)
+    def initialize(last_seen_id = {}, options)
       @last_seen_id = last_seen_id
       super(options)
     end
@@ -53,6 +53,7 @@ module Collective::Collectors
         max_pages = 1
         current_initial_id = nil
         get_another_page = true # set to true until an error id that has already been seen is hit
+        application = params[:application]
 
         resp = get_page(path, params, page, page_size)
         data = resp.body['data']
@@ -62,7 +63,7 @@ module Collective::Collectors
 
           while page <= max_pages do
             resp.body['data'].each do |error|
-              if error['id'] == @last_seen_id
+              if error['id'] == @last_seen_id[application]
                 get_another_page = false
                 break
               else
@@ -76,7 +77,7 @@ module Collective::Collectors
             resp = get_page(path, params, page, page_size)
           end
 
-          @last_seen_id = current_initial_id
+          @last_seen_id[application] = current_initial_id
         end
       end
     end
