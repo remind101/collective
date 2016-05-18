@@ -52,6 +52,7 @@ describe Collective::Collectors::TrackJS do
 
   context 'when less than a page of errors are returned' do
     let(:error_count) { 45 }
+    let(:metadata) { trackjs_metadata total_count: error_count, page: page, page_size: page_size, has_more: false }
     let(:response) { trackjs_response errors: error_count, total_errors: error_count, page: page, page_size: page_size }
 
     context 'when none of the errors have been logged before' do
@@ -85,16 +86,70 @@ describe Collective::Collectors::TrackJS do
       end
 
       context 'not all the errors are within the last @frequency seconds' do
-        let(:old_timestamps) { }
-        let(:old_timestamps) { new_error_count.times.map { 3.hours.ago.utc.strftime("%FT%T%:z") } }
-        let(:errors) { }
+        let(:old_error_count) { 7 }
+        let(:old_timestamps) { old_error_count.times.map { 3.hours.ago.utc.strftime("%FT%T%:z") } }
+        let(:old_errors) { old_error_count.times.map { |i| trackjs_error({timestamp: old_timestamps[i]}) } }
+        let(:errors) { (error_count - old_error_count).times.map { trackjs_error} + old_errors }
+        let(:response) { { "data" => errors, "metadata" => metadata } }
 
-        fit 'logs only the errors in the last @frequency s' do
+        it 'logs only the errors in the last @frequency s' do
+          stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
+            .with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
+            .to_return(
+              :body => response.to_json,
+              :status => 200,
+              :headers => {'Content-Type' => 'application/json'}
+            )
+          stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
+            .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
+            .to_return(
+              :body => empty_response.to_json,
+              :status => 200,
+              :headers => {'Content-Type' => 'application/json'}
+            )
+
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', error_count - old_error_count, hash_including(:source => "r101-frontend"))
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+          @collector.collect
+          expect(
+            a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
+          ).to have_been_made
+          expect(
+            a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
+          ).to have_been_made
         end
       end
 
       context 'none of the errors are within the last @frequency seconds' do
+        let(:old_timestamps) { error_count.times.map { 3.hours.ago.utc.strftime("%FT%T%:z") } }
+        let(:errors) { error_count.times.map { |i| trackjs_error({timestamp: old_timestamps[i]}) } }
+        let(:response) { { "data" => errors, "metadata" => metadata } }
+
         it 'logs 0 errors' do
+          stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
+            .with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
+            .to_return(
+              :body => response.to_json,
+              :status => 200,
+              :headers => {'Content-Type' => 'application/json'}
+            )
+          stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
+            .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
+            .to_return(
+              :body => empty_response.to_json,
+              :status => 200,
+              :headers => {'Content-Type' => 'application/json'}
+            )
+
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-frontend"))
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+          @collector.collect
+          expect(
+            a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
+          ).to have_been_made
+          expect(
+            a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
+          ).to have_been_made
         end
       end
     end
@@ -114,14 +169,14 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
           .to_return(
-            :body => old_response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => empty_response.to_json,
+            :body => old_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -133,20 +188,20 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
           .to_return(
-            :body => new_response.to_json,
+            :body => empty_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-marketing"})
           .to_return(
-            :body => empty_response.to_json,
+            :body => new_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
 
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', new_errors.length, hash_including(:source => "r101-frontend"))
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-frontend"))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', new_errors.length, hash_including(:source => "r101-marketing"))
         @collector.collect
         expect(
           a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
@@ -156,11 +211,6 @@ describe Collective::Collectors::TrackJS do
         ).to have_been_made.times(2)
       end
     end
-
-    # context 'when there are errors for multiple applications' do
-    #   it 'logs an error count for each application' do
-    #   end
-    # end
   end
 
   context 'when multiple pages of errors are returned' do
