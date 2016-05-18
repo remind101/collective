@@ -5,11 +5,12 @@ module Collective::Collectors
     requires :faraday
     requires :faraday_middleware
     requires :json
+    @@frequency = 60 # seconds
 
-    resolution '60s'
+    resolution @@frequency.to_s + 's'
 
     def initialize(options = {})
-      @last_seen_id = options[:last_seen_id]
+      @last_seen_id = options[:last_seen_id] || {}
       super(options)
     end
 
@@ -48,9 +49,13 @@ module Collective::Collectors
     #
     def paged(path, params={})
       Enumerator.new do |yielder|
+        current_error_time = Time.now.utc
+        oldest_error = current_error_time - @@frequency
+
         page = 1
         page_size = 250
         max_pages = 1
+        hit_too_old_error = false # TODO: remove later
         current_initial_id = nil
         get_another_page = true # set to true until an error id that has already been seen is hit
         application = params[:application]
@@ -61,10 +66,15 @@ module Collective::Collectors
         if data.length > 0
           current_initial_id = data[0]['id']
 
-          while page <= max_pages do
+          while current_error_time > oldest_error do
             resp.body['data'].each do |error|
+              current_error_time = Time.parse(error['timestamp'])
               if error['id'] == @last_seen_id[application]
                 get_another_page = false
+                break
+              elsif current_error_time <= oldest_error
+                get_another_page = false
+                hit_too_old_error = true
                 break
               else
                 yielder.yield error
