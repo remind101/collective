@@ -2,25 +2,25 @@ require 'securerandom'
 require 'faker'
 
 module TrackJSHelpers
-  def trackjs_error(params = {
+  def trackjs_error(
     message: nil,
-    timestamp: Time.now.strftime("%FT%T%:z"),
+    timestamp: Time.now.utc.strftime("%FT%T%:z"),
     url: "https://www.remind.com",
     application: "r101-frontend",
     id: SecureRandom.uuid
-  })
-    trackjs_url = "https://my.trackjs.com/details/#{params[:id]}"
-    params[:message] ||= Faker::Lorem.sentence
+  )
+    trackjs_url = "https://my.trackjs.com/details/#{id}"
+    message = message || Faker::Lorem.sentence
 
     return {
-      "message" => params[:message],
-      "timestamp" => params[:timestamp],
-      "url" => params[:url],
-      "id" => params[:id],
+      "message" => message,
+      "timestamp" => timestamp,
+      "url" => url,
+      "id" => id,
       "browserName" => "Chrome",
       "browserVersion" => "49.0.2623",
       "entry" => "window",
-      "application" => params[:application],
+      "application" => application,
       "line" => 11,
       "column" => 13161,
       "file" => "https://www.remind.com/classes/sci02",
@@ -41,8 +41,11 @@ module TrackJSHelpers
     }
   end
 
-  def trackjs_response(errors: 0, total_errors: 0, page: 1, page_size: 250)
-    data = errors.times.map { trackjs_error }
+  def trackjs_response(errors: 0, timestamps: nil, total_errors: 0, page: 1, page_size: 250)
+    timestamps = timestamps || errors.times.map { Time.now.utc.strftime("%FT%T%:z") }
+    data = errors.times.map do |i|
+      trackjs_error({timestamp: timestamps[i]})
+    end
     has_more = (page * page_size) < total_errors
 
     return {

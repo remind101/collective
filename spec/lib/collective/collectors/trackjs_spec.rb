@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'collective'
+require 'active_support/core_ext/numeric/time'
 
 describe Collective::Collectors::TrackJS do
   let(:env_api_key) { ENV["TRACKJS_API_KEY"] }
@@ -139,19 +140,27 @@ describe Collective::Collectors::TrackJS do
         ).to have_been_made.times(2)
       end
     end
+
+    # context 'when there are errors for multiple applications' do
+    #   it 'logs an error count for each application' do
+    #   end
+    # end
   end
 
-  context 'when more than maxPages pages of errors are returned' do
+  context 'when multiple pages of errors are returned' do
     let(:old_error_count) { 250 }
     let(:new_error_count) { 50 }
     let(:total_errors) { 800 }
     let(:page2) { 2 }
 
     context 'none of the errors have been logged before' do
-      let(:response) { trackjs_response errors: old_error_count, total_errors: total_errors, page: page, page_size: page_size }
-      let(:response2) { trackjs_response errors: old_error_count, total_errors: total_errors, page: page2, page_size: page_size }
+      let(:recent_timestamps) { old_error_count.times.map { Time.now.utc.strftime("%FT%T%:z") } }
+      let(:old_timestamps) { new_error_count.times.map { 3.hours.ago.utc.strftime("%FT%T%:z") } }
+      let(:combined_timestamps) { recent_timestamps.slice(0, old_error_count - new_error_count) + old_timestamps }
+      let(:response) { trackjs_response errors: old_error_count, timestamps: recent_timestamps, total_errors: total_errors, page: page, page_size: page_size }
+      let(:response2) { trackjs_response errors: old_error_count, timestamps: combined_timestamps, total_errors: total_errors, page: page2, page_size: page_size }
 
-      it 'logs maxPage * page size errors' do
+      it 'logs only the errors that occurred in the last @frequency seconds' do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
           .to_return(
@@ -181,7 +190,7 @@ describe Collective::Collectors::TrackJS do
             :headers => {'Content-Type' => 'application/json'}
           )
 
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', page_size, hash_including(:source => "r101-frontend"))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 2 * page_size - old_timestamps.length, hash_including(:source => "r101-frontend"))
         expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
         @collector.collect
         expect(
@@ -194,19 +203,23 @@ describe Collective::Collectors::TrackJS do
     end
 
     context 'some of the errors have been logged before' do
-      let(:old_errors) { old_error_count.times.map { trackjs_error } }
+      let(:page1_errors) { old_error_count.times.map { trackjs_error } }
+      let(:old_timestamps) { new_error_count.times.map { 3.hours.ago.utc.strftime("%FT%T%:z") } }
+      let(:out_of_date_errors) { new_error_count.times.map { |i| trackjs_error({timestamp: old_timestamps[i]}) } }
+      let(:page2_errors) { ((old_error_count - new_error_count).times.map { trackjs_error }) + out_of_date_errors }
       let(:new_errors) { new_error_count.times.map { trackjs_error } }
-      let(:combined_errors) { (new_errors + old_errors).first page_size }
+      let(:combined_errors) { (new_errors + page1_errors).first page_size }
       let(:old_metadata) { trackjs_metadata total_count: old_error_count, page: page, page_size: page_size, has_more: true }
-      let(:combined_metadata) { trackjs_metadata total_count: (old_error_count + new_error_count), page: page, page_size: page_size, has_more: true }
-      let(:old_response) { {"data" => old_errors, "metadata" => old_metadata } }
-      let(:combined_response) { {"data" => combined_errors, "metadata" => combined_metadata } }
+      let(:combined_metadata) { trackjs_metadata total_count: (old_error_count + new_error_count), page: page2, page_size: page_size, has_more: true }
+      let(:old_page1_response) { { "data" => page1_errors, "metadata" => old_metadata } }
+      let(:old_page2_response) { { "data" => page2_errors, "metadata" => old_metadata } }
+      let(:combined_response) { { "data" => combined_errors, "metadata" => combined_metadata } }
 
       before do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
           .to_return(
-            :body => old_response.to_json,
+            :body => old_page1_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
@@ -220,7 +233,7 @@ describe Collective::Collectors::TrackJS do
         stub_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors")
           .with(:query => {"page" => page2, "size" => page_size, "application" => "r101-frontend"})
           .to_return(
-            :body => old_response.to_json,
+            :body => old_page2_response.to_json,
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
