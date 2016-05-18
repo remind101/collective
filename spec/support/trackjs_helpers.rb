@@ -44,7 +44,7 @@ module TrackJSHelpers
   def trackjs_response(errors: 0, timestamps: nil, total_errors: 0, page: 1, page_size: 250)
     timestamps = timestamps || errors.times.map { Time.now.utc.strftime("%FT%T%:z") }
     data = errors.times.map do |i|
-      trackjs_error({timestamp: timestamps[i]})
+      trackjs_error(timestamp: timestamps[i])
     end
     has_more = (page * page_size) < total_errors
 

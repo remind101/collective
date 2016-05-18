@@ -12,7 +12,6 @@ describe Collective::Collectors::TrackJS do
 
   before do
     @collector = Collective::Collectors::TrackJS.new(
-      :last_seen_id => {},
       :api_key => env_api_key,
       :customer_id => env_customer_id
     )

@@ -43,7 +43,7 @@ module Collective::Collectors
     # we saw and page through the error list until either:
     #
     # 1. We see an error we've already returned
-    # 2. We hit a maximum page limit (to avoid scanning the entire list of
+    # 2. We hit an errors that's more than 60s old (to avoid scanning the entire list of
     #    errors the first time the collector is run)
     # 3. We hit the very end of the error list
     #
@@ -51,11 +51,8 @@ module Collective::Collectors
       Enumerator.new do |yielder|
         current_error_time = Time.now.utc
         oldest_error = current_error_time - @@frequency
-
         page = 1
         page_size = 250
-        max_pages = 1
-        hit_too_old_error = false # TODO: remove later
         current_initial_id = nil
         get_another_page = true # set to true until an error id that has already been seen is hit
         application = params[:application]
@@ -69,12 +66,8 @@ module Collective::Collectors
           while current_error_time > oldest_error do
             resp.body['data'].each do |error|
               current_error_time = Time.parse(error['timestamp'])
-              if error['id'] == @last_seen_id[application]
+              if (error['id'] == @last_seen_id[application]) || (current_error_time <= oldest_error)
                 get_another_page = false
-                break
-              elsif current_error_time <= oldest_error
-                get_another_page = false
-                hit_too_old_error = true
                 break
               else
                 yielder.yield error
