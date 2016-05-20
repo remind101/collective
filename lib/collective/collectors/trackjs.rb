@@ -1,5 +1,3 @@
-require 'pp'
-
 module Collective::Collectors
   class TrackJS < Collective::Collector
     requires :faraday
@@ -15,8 +13,9 @@ module Collective::Collectors
     end
 
     collect do
-      instrument_errors "r101-frontend"
-      instrument_errors "r101-marketing"
+      options[:applications].each do |application|
+        instrument_errors application
+      end
     end
 
     private
