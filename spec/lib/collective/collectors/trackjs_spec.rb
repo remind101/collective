@@ -13,7 +13,8 @@ describe Collective::Collectors::TrackJS do
   before do
     @collector = Collective::Collectors::TrackJS.new(
       :api_key => env_api_key,
-      :customer_id => env_customer_id
+      :customer_id => env_customer_id,
+      :applications => ['r101-frontend', 'r101-marketing']
     )
   end
 
@@ -37,8 +38,8 @@ describe Collective::Collectors::TrackJS do
           :headers => {'Content-Type' => 'application/json'}
         )
 
-      expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-frontend"))
-      expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+      expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-frontend"}))
+      expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-marketing"}))
       @collector.collect
       expect(
         a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
@@ -72,8 +73,8 @@ describe Collective::Collectors::TrackJS do
               :headers => {'Content-Type' => 'application/json'}
             )
 
-          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', error_count, hash_including(:source => "r101-frontend"))
-          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', error_count, hash_including(:tags => {application: "r101-frontend"}))
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-marketing"}))
           @collector.collect
           expect(
             a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
@@ -107,8 +108,8 @@ describe Collective::Collectors::TrackJS do
               :headers => {'Content-Type' => 'application/json'}
             )
 
-          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', error_count - old_error_count, hash_including(:source => "r101-frontend"))
-          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', error_count - old_error_count, hash_including(:tags => {application: "r101-frontend"}))
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-marketing"}))
           @collector.collect
           expect(
             a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
@@ -140,8 +141,8 @@ describe Collective::Collectors::TrackJS do
               :headers => {'Content-Type' => 'application/json'}
             )
 
-          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-frontend"))
-          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-frontend"}))
+          expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-marketing"}))
           @collector.collect
           expect(
             a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
@@ -199,8 +200,8 @@ describe Collective::Collectors::TrackJS do
             :headers => {'Content-Type' => 'application/json'}
           )
 
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-frontend"))
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', new_errors.length, hash_including(:source => "r101-marketing"))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-frontend"}))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', new_errors.length, hash_including(:tags => {application: "r101-marketing"}))
         @collector.collect
         expect(
           a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
@@ -255,8 +256,8 @@ describe Collective::Collectors::TrackJS do
             :headers => {'Content-Type' => 'application/json'}
           )
 
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 2 * page_size - old_timestamps.length, hash_including(:source => "r101-frontend"))
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 2 * page_size - old_timestamps.length, hash_including(:tags => {application: "r101-frontend"}))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-marketing"}))
         @collector.collect
         expect(
           a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})
@@ -327,8 +328,8 @@ describe Collective::Collectors::TrackJS do
             :status => 200,
             :headers => {'Content-Type' => 'application/json'}
           )
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', new_errors.length, hash_including(:source => "r101-frontend"))
-        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:source => "r101-marketing"))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', new_errors.length, hash_including(:tags => {application: "r101-frontend"}))
+        expect(Metrics).to receive(:instrument).with('trackjs.url.errors', 0, hash_including(:tags => {application: "r101-marketing"}))
         @collector.collect
         expect(
           a_request(:get, "https://api.trackjs.com/#{env_customer_id}/v1/errors").with(:query => {"page" => page, "size" => page_size, "application" => "r101-frontend"})

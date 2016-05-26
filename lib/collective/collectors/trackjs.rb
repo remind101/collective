@@ -25,7 +25,7 @@ module Collective::Collectors
       paged("/#{customer_id}/v1/errors", {application: application}).each do |error|
         count += 1
       end
-      instrument 'trackjs.url.errors', count, source: application, type: 'count'
+      instrument 'trackjs.url.errors', count, type: 'count', tags: {application: application}
     end
 
     # This function goes through a paged list of errors and yields each
