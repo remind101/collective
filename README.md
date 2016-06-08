@@ -24,6 +24,9 @@ It includes collectors for the following:
 * RabbitMQ (You need to have the management plugin enabled)
 * MongoDB
 * Postgres
+* Honeybadger
+* New Relic
+* TrackJS
 
 ## Installation
 
