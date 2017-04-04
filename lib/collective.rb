@@ -18,6 +18,7 @@ module Collective
     autoload :PGBouncer,   'collective/collectors/pgbouncer'
     autoload :Postgres,    'collective/collectors/postgres'
     autoload :TrackJS,     'collective/collectors/trackjs'
+    autoload :Fabric,      'collective/collectors/fabric'
   end
 
   class << self

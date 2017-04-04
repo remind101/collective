@@ -8,6 +8,7 @@ group :development do
   gem 'sidekiq'
   gem 'mongoid',       '~> 3.0'
   gem 'pg'
+  gem 'fabricio'
 end
 
 group :development, :test do
