@@ -6,10 +6,10 @@ module Collective::Collectors
 
     collect do
       group 'redis' do |group|
-        group.instrument 'used_memory',       (info['used_memory'].to_f / MEGABYTE).round(2)
-        group.instrument 'connected_clients', info['connected_clients']
-        group.instrument 'blocked_clients',   info['blocked_clients']
-        group.instrument 'connected_slaves',  info['connected_slaves']
+        group.instrument 'used_memory',       (info['used_memory'].to_f / MEGABYTE).round(2), type: 'sample'
+        group.instrument 'connected_clients', info['connected_clients'], type: 'sample'
+        group.instrument 'blocked_clients',   info['blocked_clients'], type: 'sample'
+        group.instrument 'connected_slaves',  info['connected_slaves'], type: 'sample'
       end
     end
 
