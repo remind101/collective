@@ -3,10 +3,10 @@ module Collective::Collectors
     requires :fabricio
 
     collect do
-
       group 'fabric' do |group|
         group.instrument 'ios.crash_free.sessions.7_days', crash_free_7_days
       end
+    end
 
     def client
       Fabricio::Client.new do |config|
